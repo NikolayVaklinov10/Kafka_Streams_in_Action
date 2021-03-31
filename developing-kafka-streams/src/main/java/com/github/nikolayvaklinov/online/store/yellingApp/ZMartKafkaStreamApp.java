@@ -66,6 +66,12 @@ public class ZMartKafkaStreamApp {
         MockDataProducer.producePurchaseData();
 
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), getProperties());
+        LOG.info("ZMart First Kafka Streams Application Started");
+        kafkaStreams.start();
+        Thread.sleep(65000);
+        LOG.info("Shutting down the Kafka Streams Application now");
+        kafkaStreams.close();
+        MockDataProducer.shutdown();
 
 
 
