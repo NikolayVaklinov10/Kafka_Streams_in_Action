@@ -59,6 +59,11 @@ public class ZMartKafkaStreamApp {
         // The final 7.PROCESSOR NODE: needed from NoSQL store such as CASSANDRA or ELASTICSEARCH
         purchaseKStream.to("purchases", Produced.with(stringSerde, purchaseSerde));
 
+        // used only to produce data for this application, not typical usage
+        MockDataProducer.producePurchaseData();
+
+
+
 
     }
 
