@@ -12,6 +12,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Printed;
+import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,9 @@ public class ZMartKafkaStreamApp {
 
         // print is useful for development and monitoring of the code
         patternKStream.print(Printed.<String, PurchasePattern>toSysOut().withLabel("patterns"));
+
+        // 4. PROCESSOR NODE: the fourth node is a sink one of the purchase pattern, writing the data to a topic
+        patternKStream.to("patterns", Produced.with(stringSerde, purchasePatternSerde));
 
 
     }
