@@ -50,6 +50,10 @@ public class ZMartKafkaStreamApp {
         // another usage of the print method capabilities for monitoring the accuracy of the code
         rewardsKStream.print(Printed.<String, RewardAccumulator>toSysOut().withLabel("rewards"));
 
+        // 6. PROCESSOR NODE: writing the rewards info to a topic named 'rewards'
+        rewardsKStream.to("rewards", Produced.with(stringSerde, rewardAccumulatorSerde));
+
+
     }
 
 }
