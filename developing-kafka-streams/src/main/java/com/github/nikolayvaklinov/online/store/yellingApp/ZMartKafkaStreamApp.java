@@ -31,7 +31,7 @@ public class ZMartKafkaStreamApp {
 
         // 1. PROCESSOR NODE: From topic with name 'transactions' we are coping the credit cards and masking their digits except last 4
         KStream<String, Purchase> purchaseKStream = builder.stream("transactions", Consumed.with(stringSerde, purchaseSerde))
-                .mapValues(p -> Purchase.builder(p).maskCreditCard().build());
+                .mapValues(p -> Purchase.builder(p).maskCreditCard().build()); // note: the sink is also a processor node
 
 
 
