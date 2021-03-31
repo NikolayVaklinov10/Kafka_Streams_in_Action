@@ -4,16 +4,23 @@ package com.github.nikolayvaklinov.online.store.yellingApp;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.model.Purchase;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.model.PurchasePattern;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.model.RewardAccumulator;
+import com.github.nikolayvaklinov.online.store.yellingApp.producer.util.MockDataProducer;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.util.serde.StreamsSerdes;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Printed;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.processor.WallclockTimestampExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Properties;
 
 @SuppressWarnings("unchecked")
 public class ZMartKafkaStreamsAdvancedReqsApp {
@@ -45,5 +52,31 @@ public class ZMartKafkaStreamsAdvancedReqsApp {
         rewardsKStream.to("rewards", Produced.with(stringSerde,rewardAccumulatorSerde));
 
 
+        
+
+
+        // used only to produce data for this application, not typical usage
+        MockDataProducer.producePurchaseData();
+
+        KafkaStreams kafkaStreams = new KafkaStreams(builder.build(),getProperties());
+        LOG.info("ZMart Advanced Requirements Kafka Streams Application Started");
+        kafkaStreams.start();
+        Thread.sleep(65000);
+        LOG.info("Shutting down the Kafka Streams Application now");
+        kafkaStreams.close();
+        MockDataProducer.shutdown();
+
+    }
+
+    private static Properties getProperties() {
+        Properties props = new Properties();
+        props.put(StreamsConfig.CLIENT_ID_CONFIG, "Example-Kafka-Streams-Job");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "streams-purchases");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "testing-streams-api");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"latest");
+        props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG, 1);
+        props.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
+        return props;
     }
 }
