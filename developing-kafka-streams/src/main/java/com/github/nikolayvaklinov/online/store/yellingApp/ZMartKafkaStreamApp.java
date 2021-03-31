@@ -44,6 +44,9 @@ public class ZMartKafkaStreamApp {
         // 4. PROCESSOR NODE: the fourth node is a sink one of the purchase pattern, writing the data to a topic
         patternKStream.to("patterns", Produced.with(stringSerde, purchasePatternSerde));
 
+        // 5. PROCESSOR NODE: the customer reward accumulator needed by HQ for rewarding loyal customers
+        KStream<String, RewardAccumulator> rewardsKStream = purchaseKStream.mapValues(purchase -> RewardAccumulator.builder(purchase).build());
+
 
     }
 
