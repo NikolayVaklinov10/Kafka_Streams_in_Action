@@ -53,6 +53,9 @@ public class ZMartKafkaStreamApp {
         // 6. PROCESSOR NODE: writing the rewards info to a topic named 'rewards'
         rewardsKStream.to("rewards", Produced.with(stringSerde, rewardAccumulatorSerde));
 
+        // purchase is monitored by print method as well
+        purchaseKStream.print(Printed.<String, Purchase>toSysOut().withLabel("purchases"));
+
         // The final 7.PROCESSOR NODE: needed from NoSQL store such as CASSANDRA or ELASTICSEARCH
         purchaseKStream.to("purchases", Produced.with(stringSerde, purchaseSerde));
 
