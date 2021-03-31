@@ -47,6 +47,8 @@ public class ZMartKafkaStreamApp {
         // 5. PROCESSOR NODE: the customer reward accumulator needed by HQ for rewarding loyal customers
         KStream<String, RewardAccumulator> rewardsKStream = purchaseKStream.mapValues(purchase -> RewardAccumulator.builder(purchase).build());
 
+        // another usage of the print method capabilities for monitoring the accuracy of the code
+        rewardsKStream.print(Printed.<String, RewardAccumulator>toSysOut().withLabel("rewards"));
 
     }
 
