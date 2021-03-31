@@ -16,7 +16,7 @@ public class KafkaStreamsYellingApp {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamsYellingApp.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
 
         // Used only to produce data for this application, not typical usage
         MockDataProducer.produceRandomTextData();
@@ -42,7 +42,7 @@ public class KafkaStreamsYellingApp {
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(),pros);
         LOG.info("Hello World Yelling App Started");
         kafkaStreams.start();
-//        Thread.sleep(35000);
+        Thread.sleep(35000);
         LOG.info("Shutting down the Yelling APP now");
         kafkaStreams.close();
         MockDataProducer.shutdown();
