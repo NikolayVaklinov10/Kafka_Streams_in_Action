@@ -11,6 +11,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Printed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,11 @@ public class ZMartKafkaStreamApp {
         KStream<String, Purchase> purchaseKStream = builder.stream("transactions", Consumed.with(stringSerde, purchaseSerde))
                 .mapValues(p -> Purchase.builder(p).maskCreditCard().build()); // note: the sink is also a processor node
 
+        // 3. PROCESSOR NODE: the Purchase Pattern is a node needed for analytics of the purchase trend amount, date, location etc. of the purchase
+        KStream<String, PurchasePattern> patternKStream = purchaseKStream.mapValues(purchase -> PurchasePattern.builder(purchase).build());
+
+        // print is useful for development and monitoring of the code
+        patternKStream.print(Printed.<String, PurchasePattern>toSysOut().withLabel("patterns"));
 
 
     }
