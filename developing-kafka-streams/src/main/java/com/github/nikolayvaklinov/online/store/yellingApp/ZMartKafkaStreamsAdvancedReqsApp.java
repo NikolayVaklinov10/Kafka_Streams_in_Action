@@ -4,6 +4,7 @@ package com.github.nikolayvaklinov.online.store.yellingApp;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.model.Purchase;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.model.PurchasePattern;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.model.RewardAccumulator;
+import com.github.nikolayvaklinov.online.store.yellingApp.producer.service.SecurityDBService;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.util.MockDataProducer;
 import com.github.nikolayvaklinov.online.store.yellingApp.producer.util.serde.StreamsSerdes;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -12,10 +13,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Printed;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.processor.WallclockTimestampExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +50,46 @@ public class ZMartKafkaStreamsAdvancedReqsApp {
         rewardsKStream.to("rewards", Produced.with(stringSerde,rewardAccumulatorSerde));
 
 
-        
+        // the extension of the application
+
+        // selecting a key for storage and filtering out low dollar purchases
+
+
+        KeyValueMapper<String, Purchase, Long> purchaseDateAsKey = (key, purchase) -> purchase.getPurchaseDate().getTime();
+
+        KStream<Long, Purchase> filteredKStream = purchaseKStream.filter((key, purchase) -> purchase.getPrice() > 5.00).selectKey(purchaseDateAsKey);
+
+        filteredKStream.print(Printed.<Long, Purchase>toSysOut().withLabel("purchases"));
+        filteredKStream.to("purchases", Produced.with(Serdes.Long(),purchaseSerde));
+
+
+
+        // branching stream for separating out purchases in new departments to their own topics
+
+        Predicate<String, Purchase> isCoffee = (key, purchase) -> purchase.getDepartment().equalsIgnoreCase("coffee");
+        Predicate<String, Purchase> isElectronics = (key, purchase) -> purchase.getDepartment().equalsIgnoreCase("electronics");
+
+        int coffee = 0;
+        int electronics = 1;
+
+        KStream<String, Purchase>[] kstreamByDept = purchaseKStream.branch(isCoffee, isElectronics);
+
+        kstreamByDept[coffee].to( "coffee", Produced.with(stringSerde, purchaseSerde));
+        kstreamByDept[coffee].print(Printed.<String, Purchase>toSysOut().withLabel( "coffee"));
+
+        kstreamByDept[electronics].to("electronics", Produced.with(stringSerde, purchaseSerde));
+        kstreamByDept[electronics].print(Printed.<String, Purchase>toSysOut().withLabel("electronics"));
+
+
+
+
+        // security Requirements to record transactions for certain employee
+        ForeachAction<String, Purchase> purchaseForeachAction = (key, purchase) ->
+                SecurityDBService.saveRecord(purchase.getPurchaseDate(), purchase.getEmployeeId(), purchase.getItemPurchased());
+
+
+        purchaseKStream.filter((key, purchase) -> purchase.getEmployeeId().equals("000000")).foreach(purchaseForeachAction);
+
 
 
         // used only to produce data for this application, not typical usage
