@@ -92,8 +92,10 @@ public class ZMartKafkaStreamsAdvancedReqsApp {
 
 
         // security Requirements to record transactions for certain employee
+        // a fraud detection code is following
         ForeachAction<String, Purchase> purchaseForeachAction = (key, purchase) ->
-                SecurityDBService.saveRecord(purchase.getPurchaseDate(), purchase.getEmployeeId(), purchase.getItemPurchased());
+                SecurityDBService.saveRecord(purchase.getPurchaseDate(),
+                        purchase.getEmployeeId(), purchase.getItemPurchased());
 
 
         purchaseKStream.filter((key, purchase) -> purchase.getEmployeeId().equals("000000")).foreach(purchaseForeachAction);
