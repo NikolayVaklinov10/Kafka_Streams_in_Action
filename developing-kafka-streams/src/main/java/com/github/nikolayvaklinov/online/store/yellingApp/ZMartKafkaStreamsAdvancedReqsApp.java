@@ -69,8 +69,13 @@ public class ZMartKafkaStreamsAdvancedReqsApp {
 
         // branching stream for separating out purchases in new departments to their own topics
 
-        Predicate<String, Purchase> isCoffee = (key, purchase) -> purchase.getDepartment().equalsIgnoreCase("coffee");
-        Predicate<String, Purchase> isElectronics = (key, purchase) -> purchase.getDepartment().equalsIgnoreCase("electronics");
+        // the two predicate for branching the stream of data
+        Predicate<String, Purchase> isCoffee =
+                (key, purchase) ->
+                        purchase.getDepartment().equalsIgnoreCase("coffee");
+        Predicate<String, Purchase> isElectronics =
+                (key, purchase) ->
+                        purchase.getDepartment().equalsIgnoreCase("electronics");
 
         int coffee = 0;
         int electronics = 1;
