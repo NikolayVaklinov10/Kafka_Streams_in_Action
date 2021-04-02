@@ -57,7 +57,10 @@ public class ZMartKafkaStreamsAdvancedReqsApp {
 
         KeyValueMapper<String, Purchase, Long> purchaseDateAsKey = (key, purchase) -> purchase.getPurchaseDate().getTime();
 
-        KStream<Long, Purchase> filteredKStream = purchaseKStream.filter((key, purchase) -> purchase.getPrice() > 5.00).selectKey(purchaseDateAsKey);
+        // Filtering only purchases above $ 5
+        KStream<Long, Purchase> filteredKStream =
+                purchaseKStream.filter((key, purchase) ->
+                        purchase.getPrice() > 5.00).selectKey(purchaseDateAsKey);
 
         filteredKStream.print(Printed.<Long, Purchase>toSysOut().withLabel("purchases"));
         filteredKStream.to("purchases", Produced.with(Serdes.Long(),purchaseSerde));
