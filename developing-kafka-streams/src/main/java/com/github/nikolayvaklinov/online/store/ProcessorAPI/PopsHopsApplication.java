@@ -16,7 +16,6 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.processor.UsePartitionTimeOnInvalidTimestamp;
-import org.apache.kafka.streams.processor.UsePreviousTimeOnInvalidTimestamp;
 import org.apache.kafka.streams.processor.WallclockTimestampExtractor;
 
 import java.util.Properties;
