@@ -15,6 +15,7 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.processor.UsePartitionTimeOnInvalidTimestamp;
 import org.apache.kafka.streams.processor.UsePreviousTimeOnInvalidTimestamp;
 import org.apache.kafka.streams.processor.WallclockTimestampExtractor;
 
@@ -46,7 +47,7 @@ public class PopsHopsApplication {
 
         toplogy.addSource(LATEST,
                 purchaseSourceNodeName,
-                new UsePreviousTimeOnInvalidTimestamp(),
+                new UsePartitionTimeOnInvalidTimestamp(),
                 stringDeserializer,
                 beerPurchaseDeserializer,
                 Topics.POPS_HOPS_PURCHASES.topicName())
